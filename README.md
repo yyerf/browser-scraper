@@ -18,7 +18,7 @@ The extension's content script hosts an isolated picker and inspector. It finger
 - `pnpm dev:sites` starts the local fixture site at `http://127.0.0.1:5173/`.
 - `pnpm dev:extension` starts WXT development mode.
 
-For an unpacked Chromium build, visit `chrome://extensions`, enable Developer mode, select **Load unpacked**, and choose `apps/extension/.output/chrome-mv3`. Open a normal HTTP(S) page, click the extension icon, and grant access to that site's origin. For Firefox, build with `pnpm --filter @visual-scraper/extension build:firefox`, then use `about:debugging` → **This Firefox** → **Load Temporary Add-on**, selecting the Firefox build's `manifest.json`. Temporary add-ons disappear when Firefox exits. Firefox MV3 support should be validated on the intended release version before distribution.
+For an unpacked Chromium build, visit `chrome://extensions`, enable Developer mode, select **Load unpacked**, and choose `apps/extension/.output/chrome-mv3`. On Linux, `.output` is a hidden folder: press **Ctrl+L** in the folder picker and paste the full path to `chrome-mv3`, or press **Ctrl+H** to show hidden folders. Select the `chrome-mv3` folder, which contains `manifest.json`. Open a normal HTTP(S) page, click the extension icon, and grant access to that site's origin. For Firefox, build with `pnpm --filter @visual-scraper/extension build:firefox`, then use `about:debugging` → **This Firefox** → **Load Temporary Add-on**, selecting the Firefox build's `manifest.json`. Temporary add-ons disappear when Firefox exits. Firefox MV3 support should be validated on the intended release version before distribution.
 
 ## Create and run a scraper
 

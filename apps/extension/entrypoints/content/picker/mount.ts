@@ -17,8 +17,15 @@ let cachedCss: string | null = null
 // Tailwind v4 leaves clickable controls at the browser's default cursor, and the
 // host page's picking cursor can't reach into our shadow root — so give our enabled
 // buttons / checkboxes a pointer cursor here.
-const BASE_RULES =
-  'button:not(:disabled),label:has(input:not(:disabled)),input[type="checkbox"]:not(:disabled){cursor:pointer}'
+const BASE_RULES = `
+button:not(:disabled),label:has(input:not(:disabled)),input[type="checkbox"]:not(:disabled){cursor:pointer}
+/* Pin the inspector's light palette when a page or dark-mode tool rewrites
+   inline backgrounds in an open shadow root. These rules also work if the
+   compiled picker stylesheet cannot be loaded. */
+#visual-scraper-inspector{color-scheme:only light!important;background-color:#fff!important;color:#172033!important}
+#visual-scraper-inspector input,#visual-scraper-inspector select,#visual-scraper-inspector button{color-scheme:only light!important;background-color:#fff!important;color:#172033!important;border-color:#cbd5e1!important}
+#visual-scraper-inspector button[data-primary="true"]{background-color:#172033!important;color:#fff!important;border-color:#172033!important}
+`
 
 async function loadCss(): Promise<string> {
   if (cachedCss !== null) return cachedCss
@@ -28,7 +35,7 @@ async function loadCss(): Promise<string> {
     const res = await fetch(url)
     cachedCss = `${BASE_RULES}${withPropertyFallbacks(remToPx(await res.text()))}`
   } catch {
-    cachedCss = ""
+    cachedCss = BASE_RULES
   }
   return cachedCss
 }

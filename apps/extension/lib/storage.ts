@@ -1,4 +1,4 @@
-import type { DatasetRepository } from "@visual-scraper/core"
+import { canonicalRecordKey, type DatasetRepository } from "@visual-scraper/core"
 import {
   type ExtractedRecord,
   extractedRecordSchema,
@@ -31,6 +31,8 @@ export const extensionRepository: DatasetRepository = {
     const checkpoint = runCheckpointSchema.parse(inputCheckpoint)
     if (checkpoint.runId !== runId) throw new Error("Run ID mismatch")
     const records = input.map((record) => extractedRecordSchema.parse(record))
+    const definition = await getDefinition(checkpoint.definitionId)
+    if (!definition) throw new Error("Run definition not found")
     const db = await dbPromise
     const tx = db.transaction(["records", "checkpoints"], "readwrite")
     const store = tx.objectStore("records")
@@ -39,8 +41,12 @@ export const extensionRepository: DatasetRepository = {
     let duplicates = 0
     for (const record of records) {
       const key = `${runId}:${record.hash}`
-      if (await store.get(key)) duplicates++
-      else {
+      const prior = await store.get(key)
+      if (prior) {
+        if (canonicalRecordKey(prior.record, definition) !== canonicalRecordKey(record, definition))
+          throw new Error("Record hash collision; data was not discarded")
+        duplicates++
+      } else {
         await store.put({ key, runId, record })
         inserted++
       }
@@ -64,6 +70,11 @@ export const extensionRepository: DatasetRepository = {
     const db = await dbPromise
     const values = await db.getAllFromIndex("records", "by-run", runId)
     return values.map((entry) => entry.record)
+  },
+  async listRecordHashes(runId) {
+    const db = await dbPromise
+    const keys = await db.getAllKeysFromIndex("records", "by-run", runId)
+    return keys.map((key) => String(key).slice(runId.length + 1))
   },
 }
 

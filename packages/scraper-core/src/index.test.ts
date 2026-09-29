@@ -94,6 +94,9 @@ function repository(): DatasetRepository {
     async listRecords() {
       return [...records.values()]
     },
+    async listRecordHashes() {
+      return [...records.values()].map((record) => record.hash)
+    },
   }
 }
 
@@ -194,4 +197,76 @@ test("persists one recovery event for the same selector change on multiple pages
     confidence: 0.94,
   })
   expect(events.filter((event) => event === "SELECTOR_HEALED")).toHaveLength(1)
+})
+
+test("a pause requested before navigation prevents the pending click", async () => {
+  let navigations = 0
+  const runtime: RuntimeAdapter = {
+    async observe() {
+      return {
+        url: "https://example.test/catalog/1",
+        records: [record],
+        navigation: [{ mode: "next-button", confidence: 0.95, label: "Next" }],
+        stateSignature: "first-page",
+      }
+    },
+    async navigate() {
+      navigations++
+      return true
+    },
+    async waitForChange() {
+      return true
+    },
+  }
+  let controller: RunController
+  controller = new RunController(runtime, repository(), definition(), {
+    onEvent(event) {
+      if (event.type === "NAVIGATION_DETECTED") controller.pause()
+    },
+  })
+  const result = await controller.run("pause-before-click")
+  expect(result.state).toBe("paused")
+  expect(result.recordCount).toBe(1)
+  expect(navigations).toBe(0)
+})
+
+test("record limit counts new records after duplicates on the same page", async () => {
+  let page = 0
+  const item = (id: number): ExtractedRecord => ({
+    hash: "",
+    sourceUrl: `https://example.test/catalog/${page}`,
+    fields: [
+      {
+        fieldId: "name",
+        status: "success",
+        rawValue: `Product ${id}`,
+        normalizedValue: `Product ${id}`,
+      },
+    ],
+  })
+  const runtime: RuntimeAdapter = {
+    async observe() {
+      page++
+      return {
+        url: `https://example.test/catalog/${page}`,
+        records: (page === 1 ? [1, 2, 3] : [1, 2, 3, 4, 5, 6]).map(item),
+        navigation: page === 1 ? [{ mode: "next-button", confidence: 0.95 }] : [],
+        stateSignature: `page-${page}`,
+      }
+    },
+    async navigate() {
+      return true
+    },
+    async waitForChange() {
+      return true
+    },
+  }
+  const config = definition()
+  config.navigation.maxRecords = 5
+  const result = await new RunController(runtime, repository(), config).run(
+    "limit-after-duplicates",
+  )
+  expect(result.recordCount).toBe(5)
+  expect(result.duplicateCount).toBe(3)
+  expect(result.stopReason).toBe("limit_reached")
 })

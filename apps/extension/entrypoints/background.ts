@@ -88,6 +88,8 @@ export default defineBackground(() => {
           return message.runId ? extensionRepository.loadCheckpoint(message.runId) : undefined
         case "scraper:records":
           return message.runId ? extensionRepository.listRecords(message.runId) : []
+        case "scraper:recordHashes":
+          return message.runId ? extensionRepository.listRecordHashes(message.runId) : []
         case "scraper:openResults": {
           if (!message.runId || !message.definitionId) throw new Error("Results run required")
           const query = new URLSearchParams({

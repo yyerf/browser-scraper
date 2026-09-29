@@ -4,6 +4,8 @@ import {
   detectNavigation,
   executeNavigation,
   extractPage,
+  fingerprint,
+  fingerprintSimilarity,
   generateLocator,
   type TrainingField,
   waitForPageChange,
@@ -86,6 +88,9 @@ function extensionRepository(): DatasetRepository {
     },
     listRecords(runId) {
       return browser.runtime.sendMessage({ kind: "scraper:records", runId })
+    },
+    listRecordHashes(runId) {
+      return browser.runtime.sendMessage({ kind: "scraper:recordHashes", runId })
     },
   }
 }
@@ -221,20 +226,56 @@ function ScraperPanel({
   useEffect(() => {
     void browser.runtime.sendMessage({ kind: "scraper:listDefinitions" }).then(setSaved)
     if (resume) {
-      void browser.runtime
-        .sendMessage({ kind: "scraper:getDefinition", definitionId: resume.definitionId })
-        .then((value: ScraperDefinition | undefined) => {
-          if (value) {
-            setDefinition(value)
-            setPreview(extractPage(value).records)
-            void start(value, resume.runId)
+      void Promise.all([
+        browser.runtime.sendMessage({
+          kind: "scraper:getDefinition",
+          definitionId: resume.definitionId,
+        }) as Promise<ScraperDefinition | undefined>,
+        browser.runtime.sendMessage({
+          kind: "scraper:checkpoint",
+          runId: resume.runId,
+        }) as Promise<RunCheckpoint | undefined>,
+      ])
+        .then(([value, checkpoint]) => {
+          if (!value) return
+          setDefinition(value)
+          currentDefinition = value
+          setPreview(extractPage(value).records)
+          if (checkpoint) setRun(checkpoint)
+          if (checkpoint?.state === "paused") {
+            setNotice("Run is paused. Select Resume when ready.")
+            return
           }
+          if (checkpoint && ["completed", "cancelled", "failed"].includes(checkpoint.state)) {
+            void browser.runtime.sendMessage({ kind: "scraper:unbind" })
+            return
+          }
+          void start(value, resume.runId)
         })
+        .catch((error: unknown) =>
+          setNotice(error instanceof Error ? error.message : "Could not restore the run"),
+        )
     }
   }, [])
 
   function refresh(fields: Training[], selectedRecord = manualRecord): void {
     if (!fields.length) {
+      if (definition && selectedRecord) {
+        const reference = fingerprint(selectedRecord)
+        const peers = Array.from(selectedRecord.parentElement?.children ?? []).filter(
+          (candidate) => fingerprintSimilarity(reference, fingerprint(candidate)) >= 0.65,
+        ).length
+        updateDefinition({
+          ...definition,
+          record: {
+            ...definition.record,
+            locator: generateLocator(selectedRecord, document, Math.max(1, peers)),
+            confidence: 1,
+          },
+        })
+        setNotice("Record container updated; review the preview before saving")
+        return
+      }
       setDefinition(null)
       setPreview([])
       return
@@ -305,6 +346,54 @@ function ScraperPanel({
 
   function addField(): void {
     if (!pendingElement || !fieldName.trim()) return
+    if (definition && training.length === 0) {
+      const selectors = [
+        definition.record.locator.primarySelector,
+        ...definition.record.locator.candidates.map((candidate) => candidate.selector),
+        ...extractPage(definition)
+          .healingEvents.filter((event) => event.kind === "record")
+          .map((event) => event.newSelector),
+      ]
+      let record: Element | null = pendingElement
+      let matchedRecord: Element | null = null
+      for (let depth = 0; record && depth < 12; depth++) {
+        if (
+          record !== pendingElement &&
+          selectors.some((selector) => {
+            try {
+              return record?.matches(selector)
+            } catch {
+              return false
+            }
+          })
+        ) {
+          matchedRecord = record
+          break
+        }
+        const root = record.getRootNode()
+        record = record.parentElement ?? (root instanceof ShadowRoot ? root.host : null)
+      }
+      if (!matchedRecord) {
+        setNotice("Select the record container first, then add the field")
+        return
+      }
+      try {
+        const candidate = buildDefinition(
+          [{ id: crypto.randomUUID(), name: fieldName.trim(), element: pendingElement }],
+          definition.metadata.name,
+          location.href,
+          matchedRecord,
+        ).fields[0]
+        if (!candidate) throw new Error("Could not infer the new field")
+        updateDefinition({ ...definition, fields: [...definition.fields, candidate] })
+        setPendingElement(null)
+        setFieldName("")
+        setNotice("Field added to the saved scraper; review the preview before saving")
+      } catch (error) {
+        setNotice(error instanceof Error ? error.message : "Could not add field")
+      }
+      return
+    }
     const next = [
       ...training,
       { id: crypto.randomUUID(), name: fieldName.trim(), element: pendingElement },
@@ -387,6 +476,7 @@ function ScraperPanel({
 
   return (
     <aside
+      id="visual-scraper-inspector"
       onClick={(event) => event.stopPropagation()}
       onKeyDown={(event) => event.stopPropagation()}
       onPointerDown={(event) => event.stopPropagation()}
@@ -562,7 +652,7 @@ function ScraperPanel({
                   if (event.key === "Enter") addField()
                 }}
               />
-              <button type="button" style={strongButton} onClick={addField}>
+              <button type="button" data-primary="true" style={strongButton} onClick={addField}>
                 Add
               </button>
             </div>
@@ -768,6 +858,7 @@ function ScraperPanel({
       <footer style={{ padding: 12, display: "flex", gap: 6, borderTop: "1px solid #e2e8f0" }}>
         <button
           type="button"
+          data-primary="true"
           disabled={!definition || busy}
           style={buttonStyle}
           onClick={() => void save()}

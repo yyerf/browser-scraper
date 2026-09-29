@@ -35,6 +35,7 @@ export interface DatasetRepository {
   }>
   loadCheckpoint(runId: string): Promise<RunCheckpoint | undefined>
   listRecords(runId: string): Promise<ExtractedRecord[]>
+  listRecordHashes(runId: string): Promise<string[]>
 }
 
 export type RunEvent = {
@@ -180,6 +181,7 @@ export class RunController {
     this.emit("SCRAPE_STARTED")
     let noProgress = checkpoint.noProgressCount
     const seenStates = new Set(checkpoint.recentStateSignatures)
+    const seenHashes = new Set(await this.repository.listRecordHashes(runId))
 
     try {
       while (true) {
@@ -238,10 +240,17 @@ export class RunController {
           return checkpoint
         }
         const remaining = this.definition.navigation.maxRecords - checkpoint.recordCount
+        let newRecords = 0
         const records = observation.records
-          .slice(0, remaining)
           .filter((record) => record.fields.some((field) => field.status === "success"))
           .map((record) => withRecordHash(record, this.definition))
+          .filter((record) => {
+            if (seenHashes.has(record.hash)) return true
+            if (newRecords >= remaining) return false
+            seenHashes.add(record.hash)
+            newRecords++
+            return true
+          })
         const priorEvents = checkpoint.healingEvents ?? []
         const eventKeys = new Set(
           priorEvents.map((event) =>
@@ -356,6 +365,7 @@ export class RunController {
           await new Promise((resolve) =>
             setTimeout(resolve, this.definition.settings.minActionIntervalMs),
           )
+          if (this.paused || this.stopped || this.options.signal?.aborted) break
           advanced = await this.runtime.navigate(candidate, this.definition)
           if (advanced) {
             this.emit("NAVIGATION_EXECUTED", { mode: candidate.mode })

@@ -29,6 +29,29 @@ test("teach four fields, traverse three pages, and export results", async () => 
     await popup.goto(`chrome-extension://${extensionId}/popup.html`)
     await popup.getByRole("button", { name: "Start scraper" }).click()
     await expect(site.locator("visual-scraper-ui")).toHaveCount(1)
+    const panelPalette = await site.evaluate(() => {
+      const shadow = document.querySelector("visual-scraper-ui")?.shadowRoot
+      if (!shadow) throw new Error("Inspector shadow root missing")
+      const hostileTheme = document.createElement("style")
+      hostileTheme.textContent =
+        "aside[style],button[style],input[style],select[style]{background-color:#171717!important}"
+      shadow.appendChild(hostileTheme)
+      const panel = shadow.querySelector("#visual-scraper-inspector")
+      const button = panel?.querySelector("button")
+      if (!panel || !button) throw new Error("Inspector controls missing")
+      return {
+        background: getComputedStyle(panel).backgroundColor,
+        text: getComputedStyle(panel).color,
+        buttonBackground: getComputedStyle(button).backgroundColor,
+        buttonText: getComputedStyle(button).color,
+      }
+    })
+    expect(panelPalette).toEqual({
+      background: "rgb(255, 255, 255)",
+      text: "rgb(23, 32, 51)",
+      buttonBackground: "rgb(255, 255, 255)",
+      buttonText: "rgb(23, 32, 51)",
+    })
 
     async function addField(selector: string, name: string) {
       await site
@@ -124,6 +147,20 @@ test("teach four fields, traverse three pages, and export results", async () => 
     await recordPanel.getByRole("button", { name: "Start scraping" }).click()
     await expect(recordPanel).toContainText("Records 20", { timeout: 100000 })
     await expect(recordPanel).toContainText("Recoveries 1")
+
+    await recordPanel.getByRole("button", { name: "Add field" }).click()
+    await site.locator(".catalog-item .rating").first().click()
+    await site.locator("visual-scraper-ui").last().getByRole("button", { name: "OK" }).click()
+    await recordPanel.getByRole("textbox", { name: "Field name" }).fill("Extra rating")
+    await recordPanel.getByRole("button", { name: "Add", exact: true }).click()
+    await expect(recordPanel.getByLabel("Name Price")).toBeVisible()
+    await expect(recordPanel.getByLabel("Name Extra rating")).toBeVisible()
+    await expect(recordPanel).toContainText("Records detected: 20")
+    await recordPanel.getByRole("button", { name: "Select record container" }).click()
+    await site.locator(".catalog-item").first().click()
+    await site.locator("visual-scraper-ui").last().getByRole("button", { name: "OK" }).click()
+    await expect(recordPanel.getByLabel("Name Extra rating")).toBeVisible()
+    await expect(recordPanel).toContainText("Records detected: 20")
   } finally {
     await context.close()
     await rm(testExtensionPath, { recursive: true, force: true })
@@ -190,6 +227,56 @@ test("pagination, scrolling, shadow DOM, and duplicate fixtures", async () => {
       if (mode === "duplicate") await expect(panel).toContainText("Duplicates 5")
       await site.close()
     }
+  } finally {
+    await context.close()
+    await rm(testExtensionPath, { recursive: true, force: true })
+  }
+})
+
+test("pause survives a reload and blocks the pending navigation", async () => {
+  test.setTimeout(90000)
+  const testExtensionPath = await mkdtemp(join(tmpdir(), "visual-scraper-pause-"))
+  await cp(extensionPath, testExtensionPath, { recursive: true })
+  const manifestPath = join(testExtensionPath, "manifest.json")
+  const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as Record<string, unknown>
+  manifest.host_permissions = ["http://127.0.0.1/*"]
+  await writeFile(manifestPath, JSON.stringify(manifest))
+  const context = await chromium.launchPersistentContext("", {
+    channel: "chromium",
+    args: [
+      `--disable-extensions-except=${testExtensionPath}`,
+      `--load-extension=${testExtensionPath}`,
+    ],
+  })
+  try {
+    const [worker] = context.serviceWorkers()
+    const serviceWorker = worker ?? (await context.waitForEvent("serviceworker"))
+    const extensionId = new URL(serviceWorker.url()).hostname
+    const site = await context.newPage()
+    await site.goto("http://127.0.0.1:4173/?mode=load-more&page=1")
+    const popup = await context.newPage()
+    await popup.goto(`chrome-extension://${extensionId}/popup.html`)
+    await popup.getByRole("button", { name: "Start scraper" }).click()
+    const panel = site.locator("visual-scraper-ui").first()
+    await panel.getByRole("button", { name: "Add field" }).click()
+    await site.locator("article h2").first().click()
+    await site.locator("visual-scraper-ui").last().getByRole("button", { name: "OK" }).click()
+    await panel.getByRole("textbox", { name: "Field name" }).fill("Name")
+    await panel.getByRole("button", { name: "Add", exact: true }).click()
+    await panel.getByLabel("Delay between actions (ms)").fill("3000")
+    await panel.getByRole("button", { name: "Start scraping" }).click()
+    await expect(panel).toContainText("Page 1: 20 new records")
+    await panel.getByRole("button", { name: "Pause" }).click()
+    await expect(panel).toContainText("paused", { timeout: 10000 })
+    await expect(site.locator("article")).toHaveCount(20)
+
+    await site.reload()
+    const restored = site.locator("visual-scraper-ui").first()
+    await expect(restored).toContainText("paused")
+    await expect(restored).toContainText("Records 20")
+    await expect(site.locator("article")).toHaveCount(20)
+    await restored.getByRole("button", { name: "Resume" }).click()
+    await expect(restored).toContainText("Records 60", { timeout: 60000 })
   } finally {
     await context.close()
     await rm(testExtensionPath, { recursive: true, force: true })

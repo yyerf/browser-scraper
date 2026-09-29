@@ -116,6 +116,13 @@ export class WorkerRepository implements DatasetRepository {
     return rows.map((row) => extractedRecordSchema.parse(JSON.parse(row.record_json)))
   }
 
+  async listRecordHashes(runId: string): Promise<string[]> {
+    const rows = this.db.prepare("SELECT hash FROM records WHERE run_id = ?").all(runId) as Array<{
+      hash: string
+    }>
+    return rows.map((row) => row.hash)
+  }
+
   close(): void {
     this.db.close()
   }

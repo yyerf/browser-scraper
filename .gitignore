@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.output/
+.wxt/
+.cache/
+.env*
+!.env.example
+*.sqlite
+*.sqlite-*
+*.xpi
+*.zip
+playwright-report/
+test-results/
+worker-data/
+browser-profiles/
+*.csv
+*.xlsx

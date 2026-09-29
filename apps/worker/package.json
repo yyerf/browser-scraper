@@ -1,0 +1,29 @@
+{
+  "name": "@visual-scraper/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "scraper": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "esbuild src/cli.ts --bundle --platform=node --format=esm --external:crawlee --external:playwright --external:exceljs --external:better-sqlite3 --external:zod --outfile=dist/cli.js && esbuild ../../packages/scraper-dom/src/browser-runtime.ts --bundle --format=iife --platform=browser --outfile=dist/dom-runtime.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@visual-scraper/schema": "workspace:*",
+    "@visual-scraper/core": "workspace:*",
+    "@visual-scraper/dom": "workspace:*",
+    "@visual-scraper/export": "workspace:*",
+    "better-sqlite3": "12.2.0",
+    "crawlee": "3.15.3",
+    "playwright": "1.58.2",
+    "exceljs": "4.4.0",
+    "zod": "4.1.12"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "7.6.13",
+    "esbuild": "0.25.12",
+    "typescript": "5.9.3"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "name": "@visual-scraper/extension",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wxt",
+    "dev:firefox": "wxt -b firefox --mv3",
+    "build": "wxt build --mv3",
+    "build:firefox": "wxt build -b firefox --mv3",
+    "zip": "wxt zip",
+    "typecheck": "tsc --noEmit",
+    "postinstall": "wxt prepare"
+  },
+  "dependencies": {
+    "@medv/finder": "^4.0.2",
+    "@remixicon/react": "^4.9.0",
+    "@visual-scraper/schema": "workspace:*",
+    "@visual-scraper/core": "workspace:*",
+    "@visual-scraper/dom": "workspace:*",
+    "@visual-scraper/export": "workspace:*",
+    "idb": "8.0.3",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@fontsource-variable/hanken-grotesk": "^5.2.8",
+    "@fontsource-variable/jetbrains-mono": "^5.2.8",
+    "@openpicker/protocol": "workspace:*",
+    "@openpicker/selector-rules-ui": "workspace:*",
+    "@tailwindcss/vite": "^4.3.0",
+    "@types/chrome": "^0.1.12",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@wxt-dev/i18n": "^0.2.5",
+    "@wxt-dev/module-react": "^1.2.2",
+    "tailwindcss": "^4.3.0",
+    "typescript": "^5.9.3",
+    "wxt": "^0.20.6"
+  }
+}

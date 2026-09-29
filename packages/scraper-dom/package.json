@@ -1,0 +1,20 @@
+{
+  "name": "@visual-scraper/dom",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@medv/finder": "4.0.2",
+    "@visual-scraper/schema": "workspace:*",
+    "@visual-scraper/core": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3"
+  }
+}

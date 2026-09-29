@@ -1,0 +1,99 @@
+# Spanish (Español) — machine-translated, review welcome. Mirrors en.yml.
+# Brand names (OpenPicker, Usertour) and example/regex values stay in English.
+
+extDescription: Selector de elementos CSS de código abierto.
+
+brandTagline: Elige un elemento y obtén su selector
+
+popup:
+  pickThisPage: Elegir un elemento en esta página
+  settings: "Ajustes"
+  docs: Docs
+
+theme:
+  light: Claro
+  dark: Oscuro
+  system: Sistema
+
+options:
+  authTitle: Autorización
+  authDesc: Elige qué sitios pueden usar el selector de elementos.
+  allowAll: Permitir todos
+  allowAllNote: Cualquier sitio puede usar el selector. No se captura nada hasta que eliges y confirmas.
+  ask: Preguntar en cada sitio
+  askNote: Se pregunta en cada sitio la primera vez; tu elección se recuerda en la lista de abajo.
+  blocklist: Lista de bloqueo
+  blocklistNote: Todos los sitios están permitidos excepto los que bloquees abajo.
+  sitePermsTitle: Permisos de sitios
+  blockedSitesTitle: Sitios bloqueados
+  sitePermsDesc: Permite o bloquea sitios concretos por adelantado.
+  blockedSitesDesc: Los sitios de esta lista nunca pueden usar el selector.
+  allow: Permitir
+  block: Bloquear
+  unblock: Desbloquear
+  reset: Restablecer
+  allowed: Permitido
+  blocked: Bloqueado
+  loading: Cargando…
+  noBlocked: Aún no hay sitios bloqueados.
+  noConfigured: Aún no hay sitios configurados.
+  invalidOrigin: Introduce un origen válido, p. ej. https://example.com
+  removeDecision: Eliminar esta decisión
+  appearanceTitle: Apariencia
+  appearanceDesc: Tema de la propia interfaz de OpenPicker.
+
+  selectorRulesTitle: "Reglas de selector"
+  selectorRulesDesc: "Controla cómo se construyen los selectores: global o por sitio."
+  globalDefault: "Valor global por defecto"
+  perSiteRules: "Reglas por sitio"
+  perSiteRulesDesc: "Anula el valor global por defecto para sitios concretos."
+  noSiteRules: "Aún no hay reglas por sitio."
+  add: "Añadir"
+  edit: "Editar"
+  done: "Listo"
+picker:
+  hoverHint: Mueve el ratón y haz clic en un elemento para seleccionarlo.
+  noMatchingTarget: "No se puede seleccionar este elemento"
+  ruleMismatch: "Este selector no cumple tus reglas"
+  ruleEmpty: "Ningún selector cumple tus reglas: elige otro elemento o relaja las reglas"
+  selectorLabel: Selector
+  hoverPlaceholder: pasa el cursor sobre un elemento…
+  invalidSelector: Selector no válido
+  matchCount:
+    1: $1 coincidencia
+    n: $1 coincidencias
+  elementLabel: Elemento
+  attributesLabel: Atributos
+  filterAttrs: Filtrar atributos…
+  noMatchingAttrs: No hay atributos coincidentes.
+  showMore: Mostrar más
+  showLess: Mostrar menos
+  empty: vacío
+  paused: La selección está en pausa. Ve a la página que tiene tu elemento y luego reanuda.
+  resume: Reanudar selección
+  ok: Aceptar
+  copy: Copiar
+  copied: Copiado
+  noContent: Sin contenido
+  swapSide: Cambiar de lado
+  navigateAway: Ir a otra página
+  selectorSettings: Ajustes del selector
+  close: Cerrar
+  pickAnother: Elegir otro elemento
+  prevSibling: Hermano anterior
+  nextSibling: Hermano siguiente
+  scrollIntoView: Desplazar hasta verlo
+  selectParent: Seleccionar el elemento padre
+  selectFirstChild: Seleccionar el primer hijo
+
+settings:
+  allowSelectorTypes: Tipos de selector permitidos
+  enableId: Activar ID
+  enableClass: Activar Class
+  enableAttribute: Activar atributo
+  enableTag: "Activar etiqueta"
+  allow: "Permitir"
+  ignore: "Ignorar"
+  regexHint: "Regex de nombres. Permitir = solo coincidencias; Ignorar = nunca; vacío = automático."
+  lockedBySite: "Bloqueado por el sitio"
+  requireUnique: "Elige un elemento que coincida con exactamente uno."

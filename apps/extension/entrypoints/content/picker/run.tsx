@@ -1,0 +1,76 @@
+import type { PickParams, PickResult } from "@openpicker/protocol"
+import ReactDOM from "react-dom/client"
+import { watchTheme } from "@/lib/theme"
+import { mountShadow } from "./mount"
+import { Picker } from "./Picker"
+import { resolveInitialSettings } from "./selectorSettings"
+import { loadGlobalSelectorSettings, loadSelectorSettings } from "./settingsStore"
+
+/** Outcome of a pick: a confirmed result, a user cancel, or a consent denial. */
+export type PickOutcome =
+  | { type: "result"; result: PickResult; selected?: Element }
+  | { type: "cancelled" }
+  | { type: "denied" }
+
+let active = false
+let cancelActive: (() => void) | null = null
+
+/** Abort an in-flight pick (resolves it as cancelled). Used by the `cancel` method. */
+export function cancelActivePicker(): void {
+  cancelActive?.()
+}
+
+/**
+ * Mount the picker into an isolated Shadow DOM and resolve when the user confirms
+ * (PickResult) or cancels. Only one picker runs at a time. `canNavigate` offers the
+ * "navigate to another page" control — only safe in the cross-tab target tab, where
+ * the pick resumes after navigation and the result is routed back via the background.
+ * `copyOnConfirm` is for the toolbar (same-tab, human) pick: there is no SDK caller
+ * to receive the result, so confirming copies the selector to the clipboard instead.
+ */
+export async function runPicker(
+  params: Partial<PickParams> = {},
+  options: { canNavigate?: boolean; copyOnConfirm?: boolean } = {},
+): Promise<PickOutcome> {
+  if (active) return { type: "cancelled" }
+  active = true
+
+  // Resolve selector settings (read semantics B): per-site override, else the global
+  // default, else built-in — then layer the SDK's `selector` config on top (AND).
+  const [perSite, global] = await Promise.all([
+    loadSelectorSettings(window.origin),
+    loadGlobalSelectorSettings(),
+  ])
+  const initialSettings = resolveInitialSettings(perSite, global, params.selector)
+
+  const mount = await mountShadow()
+  // Theme the picker UI to match the user's choice; `.dark` lands on the shadow
+  // container so the panel's dark: utilities apply inside the isolated root.
+  const stopTheme = watchTheme(mount.container)
+  const root = ReactDOM.createRoot(mount.container)
+
+  return new Promise<PickOutcome>((resolve) => {
+    let settled = false
+    const finish = (outcome: PickOutcome) => {
+      if (settled) return
+      settled = true
+      active = false
+      cancelActive = null
+      stopTheme()
+      root.unmount()
+      mount.remove()
+      resolve(outcome)
+    }
+    cancelActive = () => finish({ type: "cancelled" })
+    root.render(
+      <Picker
+        params={params}
+        host={mount.host}
+        canNavigate={options.canNavigate}
+        copyOnConfirm={options.copyOnConfirm}
+        initialSettings={initialSettings}
+        onResolve={finish}
+      />,
+    )
+  })
+}

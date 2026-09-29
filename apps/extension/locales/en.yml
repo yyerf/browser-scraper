@@ -1,0 +1,100 @@
+# OpenPicker UI strings (source locale). Other locales mirror these keys.
+# Brand names (OpenPicker, Usertour) and example/regex values stay in English.
+
+# Store/extension description (the manifest name lives in wxt.config.ts, not here).
+extDescription: Open-source CSS element picker.
+
+brandTagline: Pick an element, get its selector
+
+popup:
+  pickThisPage: Pick an element on this page
+  settings: "Settings"
+  docs: Docs
+
+theme:
+  light: Light
+  dark: Dark
+  system: System
+
+options:
+  authTitle: Authorization
+  authDesc: Choose which sites may use the element picker.
+  allowAll: Allow all
+  allowAllNote: Any site can use the picker. Nothing is captured without you picking and confirming.
+  ask: Ask each site
+  askNote: Each site is asked the first time; your choice is remembered in the list below.
+  blocklist: Blocklist
+  blocklistNote: Every site is allowed except the ones you block below.
+  sitePermsTitle: Site permissions
+  blockedSitesTitle: Blocked sites
+  sitePermsDesc: Allow or block specific sites ahead of time.
+  blockedSitesDesc: Sites listed here can never use the picker.
+  allow: Allow
+  block: Block
+  unblock: Unblock
+  reset: Reset
+  allowed: Allowed
+  blocked: Blocked
+  loading: Loading…
+  noBlocked: No sites blocked yet.
+  noConfigured: No sites configured yet.
+  invalidOrigin: Enter a valid origin, e.g. https://example.com
+  removeDecision: Remove this decision
+  appearanceTitle: Appearance
+  appearanceDesc: Theme for OpenPicker's own UI.
+
+  selectorRulesTitle: "Selector rules"
+  selectorRulesDesc: "Control how selectors are built — globally or per site."
+  globalDefault: "Global default"
+  perSiteRules: "Per-site rules"
+  perSiteRulesDesc: "Override the global default for specific sites."
+  noSiteRules: "No per-site rules yet."
+  add: "Add"
+  edit: "Edit"
+  done: "Done"
+picker:
+  hoverHint: Move your mouse and click an element to select it.
+  noMatchingTarget: "This element can't be selected."
+  ruleMismatch: "This selector is outside your rules."
+  ruleEmpty: "No selector matches your rules — pick another element or relax the rules."
+  selectorLabel: Selector
+  hoverPlaceholder: hover an element…
+  invalidSelector: Invalid selector
+  matchCount:
+    1: $1 match
+    n: $1 matches
+  elementLabel: Element
+  attributesLabel: Attributes
+  filterAttrs: Filter attributes…
+  noMatchingAttrs: No matching attributes.
+  showMore: Show more
+  showLess: Show less
+  empty: empty
+  paused: Picking is paused. Go to the page that has your element, then resume.
+  resume: Resume picking
+  ok: OK
+  copy: Copy
+  copied: Copied
+  noContent: No Content
+  swapSide: Swap side
+  navigateAway: Navigate to another page
+  selectorSettings: Selector settings
+  close: Close
+  pickAnother: Pick another element
+  prevSibling: Previous sibling
+  nextSibling: Next sibling
+  scrollIntoView: Scroll into view
+  selectParent: Select parent
+  selectFirstChild: Select first child
+
+settings:
+  allowSelectorTypes: Allow selector types
+  enableId: Enable ID
+  enableClass: Enable Class
+  enableAttribute: Enable Attribute
+  enableTag: "Enable tag"
+  allow: "Allow"
+  ignore: "Ignore"
+  regexHint: "Regex of names. Allow = only matches; Ignore = never matches. Empty = smart default."
+  lockedBySite: "Locked by the site"
+  requireUnique: "Pick an element that matches exactly one."

@@ -1,0 +1,35 @@
+{
+  "name": "visual-scraper",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.6.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "pnpm --filter @visual-scraper/extension build && pnpm --filter @visual-scraper/extension build:firefox && pnpm --filter @visual-scraper/worker build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "test:unit": "vitest run",
+    "test:integration": "playwright test --project=chromium",
+    "test:e2e:chromium": "playwright test --project=chromium",
+    "test:e2e:firefox": "node apps/test-sites/firefox-e2e.mjs",
+    "test:parity": "playwright test --project=chromium --grep 'worker parity'",
+    "test:performance": "vitest run packages/scraper-dom/performance.test.ts",
+    "check:release": "pnpm typecheck && pnpm lint && pnpm test:unit && pnpm build && pnpm test:e2e:chromium && pnpm test:e2e:firefox && pnpm test:parity && pnpm test:performance",
+    "dev:sites": "pnpm --filter @visual-scraper/test-sites dev",
+    "dev:extension": "pnpm --filter @visual-scraper/extension dev"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.16",
+    "@playwright/test": "1.58.2",
+    "@webext-core/fake-browser": "1.5.2",
+    "@types/node": "22.19.0",
+    "jsdom": "29.1.1",
+    "selenium-webdriver": "4.36.0",
+    "typescript": "5.9.3",
+    "vitest": "4.1.8"
+  }
+}

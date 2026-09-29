@@ -1,0 +1,99 @@
+# Russian (Русский) — machine-translated, review welcome. Mirrors en.yml.
+# Brand names (OpenPicker, Usertour) and example/regex values stay in English.
+
+extDescription: Открытый инструмент выбора CSS-элементов.
+
+brandTagline: Выберите элемент и получите его селектор
+
+popup:
+  pickThisPage: Выбрать элемент на этой странице
+  settings: "Настройки"
+  docs: Документация
+
+theme:
+  light: Светлая
+  dark: Тёмная
+  system: Системная
+
+options:
+  authTitle: Авторизация
+  authDesc: Выберите, какие сайты могут использовать инструмент выбора элементов.
+  allowAll: Разрешить все
+  allowAllNote: Любой сайт может использовать инструмент. Ничего не сохраняется, пока вы не выберете и не подтвердите.
+  ask: Спрашивать на каждом сайте
+  askNote: На каждом сайте спрашивается в первый раз; ваш выбор запоминается в списке ниже.
+  blocklist: Чёрный список
+  blocklistNote: Разрешены все сайты, кроме тех, которые вы заблокируете ниже.
+  sitePermsTitle: Разрешения сайтов
+  blockedSitesTitle: Заблокированные сайты
+  sitePermsDesc: Заранее разрешите или заблокируйте определённые сайты.
+  blockedSitesDesc: Сайты из этого списка никогда не смогут использовать инструмент.
+  allow: Разрешить
+  block: Заблокировать
+  unblock: Разблокировать
+  reset: Сбросить
+  allowed: Разрешён
+  blocked: Заблокирован
+  loading: Загрузка…
+  noBlocked: Пока нет заблокированных сайтов.
+  noConfigured: Пока нет настроенных сайтов.
+  invalidOrigin: Введите корректный источник, например https://example.com
+  removeDecision: Удалить это решение
+  appearanceTitle: Оформление
+  appearanceDesc: Тема собственного интерфейса OpenPicker.
+
+  selectorRulesTitle: "Правила селектора"
+  selectorRulesDesc: "Управляйте построением селекторов — глобально или для сайта."
+  globalDefault: "Глобальное значение по умолчанию"
+  perSiteRules: "Правила для сайтов"
+  perSiteRulesDesc: "Переопределите глобальное значение для конкретных сайтов."
+  noSiteRules: "Пока нет правил для сайтов."
+  add: "Добавить"
+  edit: "Изменить"
+  done: "Готово"
+picker:
+  hoverHint: Переместите курсор и щёлкните по элементу, чтобы выбрать его.
+  noMatchingTarget: "Этот элемент нельзя выбрать"
+  ruleMismatch: "Этот селектор не соответствует вашим правилам"
+  ruleEmpty: "Нет селектора, соответствующего правилам — выберите другой элемент или смягчите правила"
+  selectorLabel: Селектор
+  hoverPlaceholder: наведите курсор на элемент…
+  invalidSelector: Недопустимый селектор
+  matchCount:
+    1: $1 совпадение
+    n: $1 совпадений
+  elementLabel: Элемент
+  attributesLabel: Атрибуты
+  filterAttrs: Фильтр атрибутов…
+  noMatchingAttrs: Нет подходящих атрибутов.
+  showMore: Показать больше
+  showLess: Свернуть
+  empty: пусто
+  paused: Выбор приостановлен. Перейдите на страницу с нужным элементом и продолжите.
+  resume: Продолжить выбор
+  ok: ОК
+  copy: Копировать
+  copied: Скопировано
+  noContent: Нет содержимого
+  swapSide: Сменить сторону
+  navigateAway: Перейти на другую страницу
+  selectorSettings: Настройки селектора
+  close: Закрыть
+  pickAnother: Выбрать другой элемент
+  prevSibling: Предыдущий соседний элемент
+  nextSibling: Следующий соседний элемент
+  scrollIntoView: Прокрутить до элемента
+  selectParent: Выбрать родительский элемент
+  selectFirstChild: Выбрать первый дочерний элемент
+
+settings:
+  allowSelectorTypes: Разрешённые типы селекторов
+  enableId: Включить ID
+  enableClass: Включить Class
+  enableAttribute: Включить атрибут
+  enableTag: "Включить тег"
+  allow: "Разрешить"
+  ignore: "Игнорировать"
+  regexHint: "Регулярное выражение имён. Разрешить — только совпадения; Игнорировать — исключить; пусто — авто."
+  lockedBySite: "Заблокировано сайтом"
+  requireUnique: "Выберите элемент, совпадающий ровно с одним."
